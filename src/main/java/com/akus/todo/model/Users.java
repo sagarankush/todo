@@ -7,18 +7,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Set;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access= AccessLevel.PRIVATE, force=true)
-public class Task implements Serializable {
+public class Users implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
 
-    @ManyToOne
-    private Users user;
-
-    private String taskDetails;
+    private String FirstName;
+    private String secondName;
+    private String phone;
 }
