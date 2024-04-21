@@ -3,4 +3,10 @@ spring:
     generate-unique-name: false
     name: task
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "mappings,info"
+
 debug: true
