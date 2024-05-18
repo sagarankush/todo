@@ -5,6 +5,7 @@ import TaskCard from './TaskCard';
 import Task from '../models/Task';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/TaskList.module.css';
+import { TASKS_URL } from '../utils/Constants';
 
 interface TaskListProps {
     user: User | undefined;
@@ -27,9 +28,13 @@ const TaskList: React.FC<TaskListProps> = ({ user, setTask }) => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:8080/rest/getbyuser/' + user.id);
+            const response = await fetch(TASKS_URL + user.userId);
             const data = await response.json();
             let parsedTaskList: Task[] = parseTaskList(data);
+            console.log('Data:');
+            console.log(data);
+            console.log('Task list:');
+            console.log(parsedTaskList)
             setTaskList(parsedTaskList);
         } catch (error) {
             console.error('Error fetching tasks:', error);
@@ -57,10 +62,10 @@ const TaskList: React.FC<TaskListProps> = ({ user, setTask }) => {
 
     const parseTaskList = (data: any): Task[] => {
         return data.map((task: any) => ({
-            id: task.id,
-            userId: "need to add user id here",
+            taskId: task.taskId,
+            user: { userId: task.user.userId },
             title: task.title,
-            details: task.taskDetails,
+            details: task.details,
             dueDate: task.dueDate
         }));
     }
@@ -71,10 +76,10 @@ const TaskList: React.FC<TaskListProps> = ({ user, setTask }) => {
                 <Title level={4}>Your Tasks</Title>
                 <Button type="primary" onClick={() => history('/createtask')}>Create New Task</Button>
             </div>
-            <Flex wrap='wrap' gap={"large"} style={{overflow: 'auto', height: '100%', padding: '20px'}}>
+            <Flex wrap='wrap' gap={"large"} style={{ overflow: 'auto', height: '100%', padding: '20px' }}>
                 {taskList.map((task) => (
-                    <span key={task.id} className={styles['task-container-span']}>
-                        <TaskCard key={task.id} task={task} setTask={setTask} onClickDeleteTask={onClickDeleteTask} />
+                    <span key={task.taskId} className={styles['task-container-span']}>
+                        <TaskCard key={task.taskId} task={task} setTask={setTask} onClickDeleteTask={onClickDeleteTask} />
                     </span>
                 ))}
             </Flex>

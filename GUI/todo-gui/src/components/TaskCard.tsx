@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Card } from 'antd';
 import Task from '../models/Task';
-import Meta from 'antd/es/card/Meta';
 import { EditOutlined, AlertTwoTone, DeleteFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +19,7 @@ const TaskCard: React.FC<TaskProps> = ({ task, setTask, onClickDeleteTask }) => 
     }, [task]);
 
     const actions = [
-        <DeleteFilled key="setting" onClick={() => onClickDeleteTask(task?.id)} />,
+        <DeleteFilled key="setting" onClick={() => onClickDeleteTask(task?.taskId)} />,
         <EditOutlined key="edit" onClick={onClickEditBtn} />,
         <AlertTwoTone key="alert" />
     ]
@@ -43,7 +42,7 @@ const TaskCard: React.FC<TaskProps> = ({ task, setTask, onClickDeleteTask }) => 
             style={{ width: 300 }}
             actions={actions}
         >
-            <Meta
+            <Card.Meta
                 style={{ height: "100%" }}
                 title={task?.title}
                 description={task?.details.slice(0, 100) + '...'}

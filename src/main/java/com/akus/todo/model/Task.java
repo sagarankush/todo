@@ -1,3 +1,14 @@
+//create a JPA entity class Users.java
+// which follows the following sql scheme
+//    CREATE TABLE user (CREATE TABLE task (
+//    taskId INT PRIMARY KEY,
+//    title VARCHAR(100),
+//    details TEXT,
+//    dueDate TIMESTAMP,
+//    userId INT,
+//    FOREIGN KEY (userId) REFERENCES user(userId)
+//      );
+
 package com.akus.todo.model;
 
 import jakarta.persistence.*;
@@ -16,14 +27,14 @@ import java.util.Date;
 public class Task implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
-
-    @ManyToOne
-    private Users user;
+    Long taskId;
 
     private String title;
 
     private Date dueDate;
 
-    private String taskDetails;
+    private String details;
+
+    @ManyToOne
+    private Users user;
 }

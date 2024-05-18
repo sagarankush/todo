@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Card } from 'antd';
+import { Card, DatePicker, Flex } from 'antd';
 import Task from '../models/Task';
 import Meta from 'antd/es/card/Meta';
 import { EditOutlined, DeleteFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/TaskCard.module.css';
+import dayjs from 'dayjs';
 
 interface TaskProps {
     task: Task | undefined,
@@ -13,6 +14,8 @@ interface TaskProps {
 
 const TaskCardFull: React.FC<TaskProps> = ({ task, setTask }) => {
     const history = useNavigate();
+    const dateFormat = 'YYYY-MM-DD';
+
     useEffect(() => {
         if (!task) {
             history('/tasklist');
@@ -20,7 +23,7 @@ const TaskCardFull: React.FC<TaskProps> = ({ task, setTask }) => {
     }, [task]);
 
     const actions = [
-        <DeleteFilled key="setting" onClick={() => onClickDeleteTask(task?.id)} />,
+        <DeleteFilled key="setting" onClick={() => onClickDeleteTask(task?.taskId)} />,
         <EditOutlined key="edit" onClick={onClickEditBtn} />
     ]
 
@@ -57,7 +60,23 @@ const TaskCardFull: React.FC<TaskProps> = ({ task, setTask }) => {
         >
             <Meta
                 style={{ height: "100%" }}
-                title={task?.title}
+                title={
+                    <>
+                        <Flex justify='space-between'>
+                            <span>
+                                {task?.title}
+                            </span>
+                            <span>
+                                Due Date:
+                                <DatePicker
+                                    disabled
+                                    style={{ marginLeft: '10px' }}
+                                    defaultValue={dayjs(task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : undefined, dateFormat)}
+                                />
+                            </span>
+                        </Flex>
+                    </>
+                }
                 description={task?.details}
             />
         </Card>

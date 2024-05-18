@@ -17,7 +17,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
         >
             <span style={{ color: 'white', fontWeight: "bolder", fontSize: "20px" }}>
                 {/* <div className="demo-logo" /> */}
-                TODO
+                <a style={{ color: 'inherit', textDecoration: 'inherit' }} href='/'>TODO</a>
             </span>
             <span style={{ color: 'white', fontWeight: "bolder", fontSize: "20px" }}>{user?.firstName}</span>
         </Header>

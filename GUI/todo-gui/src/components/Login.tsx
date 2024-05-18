@@ -1,12 +1,8 @@
-// login component
-// accepts user and setUser as props
-// takes input from user and sets it to user state
-// one button to login which routes to tasklist page
-// Path: src/components/Login.tsx
 import { Button, Input, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import User from '../models/User';
+import { GET_ALL_USERS_URL } from '../utils/Constants';
 
 interface LoginProps {
     setUser: (user: User) => void;
@@ -26,7 +22,7 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
 
     const fetchUserList = async () => {
         try {
-            const response = await fetch('http://localhost:8080/rest/getalluser');
+            const response = await fetch(GET_ALL_USERS_URL);
             const data = await response.json();
             let parsedUserList: User[] = parseUserList(data);
             setUserList(parsedUserList);          
@@ -37,14 +33,14 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
 
     const parseUserList = (data: any): User[] => {
         return data.map((user: any) => ({
-            id: user.id,
+            userId: user.userId,
             firstName: user.firstName,
-            lastName: user.secondName,
+            lastName: user.lastName,
             phone: user.phone,
             password: "randompassword",
-            createdAt: "random creation date",
-            updatedAt: "random update date",
-            email: user.firstName + "@" + user.secondName + ".com",
+            createdAt: user.createdAt,
+            modifiedAt: user.modifiedAt,
+            email: user.email,
         }));
     };
 
@@ -53,7 +49,7 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
         if (!selectedUserId && !userList) {
             return;
         } else {
-            setUser(userList.find((user: User) => user.id === selectedUserId) as User);
+            setUser(userList.find((user: User) => user.userId === selectedUserId) as User);
             history(`/tasklist`);
         }
     }
@@ -77,7 +73,7 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
             >
                 <Select onChange={(value) => setselectedUserId(value)}>
                     {userList.map((user: any) => (
-                        <Select.Option key={user.id} value={user.id}>
+                        <Select.Option key={user.userId} value={user.userId}>
                             {user.firstName + " " + user.lastName}
                         </Select.Option>
                     ))}

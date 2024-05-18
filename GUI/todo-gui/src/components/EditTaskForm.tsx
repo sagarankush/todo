@@ -1,18 +1,30 @@
-import { Card, Form } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Card, DatePicker, Flex, Form, Input } from 'antd';
 import React, { useEffect, useState } from 'react';
 import User from '../models/User';
 import { useNavigate } from 'react-router-dom';
 import Task from '../models/Task';
 import Meta from 'antd/es/card/Meta';
 import { SaveFilled } from '@ant-design/icons'
+import type { DatePickerProps } from 'antd';
+import dayjs from 'dayjs';
 
 interface CreateTaskFormProps {
     user: User | undefined;
     task: Task | undefined;
 }
 
+type FieldType = {
+    username?: string;
+    password?: string;
+    remember?: string;
+};
+
 const EditTaskForm: React.FC<CreateTaskFormProps> = ({ user, task }) => {
+    const [taskTitle, setTaskTitle] = useState(task?.title);
+    const [taskDueDate, setTaskDueDate] = useState<Date>(task?.dueDate ? new Date(task?.dueDate) : new Date());
+    const [taskDetails, setTaskDetails] = useState(task?.details);
+    const dateFormat = 'YYYY-MM-DD';
+
     const history = useNavigate();
     useEffect(() => {
         if (!user) {
@@ -20,12 +32,20 @@ const EditTaskForm: React.FC<CreateTaskFormProps> = ({ user, task }) => {
         }
     }, [user]);
 
-    const [taskDetails, setTaskDetails] = useState(task?.details);
-
+    useEffect(() => {
+        setTaskTitle(task?.title);
+        setTaskDetails(task?.details);
+        setTaskDueDate(task?.dueDate ? new Date(task?.dueDate) : new Date());
+    }, [task]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        postTask(JSON.stringify(taskDetails));
+        if (task && user) {
+            task.title = taskTitle!;
+            task.details = taskDetails!;
+            task.dueDate = new Date(taskDueDate.toISOString());   // convert the string to a Date object
+            postTask(JSON.stringify(task));
+        }
         history('/tasklist');
     };
 
@@ -34,8 +54,8 @@ const EditTaskForm: React.FC<CreateTaskFormProps> = ({ user, task }) => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:8080/rest/updatetask/' + task?.id, {
-                method: 'PUT',
+            const response = await fetch('http://localhost:8080/rest/savetask', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -51,55 +71,72 @@ const EditTaskForm: React.FC<CreateTaskFormProps> = ({ user, task }) => {
         setTaskDetails(e.target.value);
     }
 
+    const onChangeTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTaskTitle(e.target.value);
+    }
+
+    const onDateChange: DatePickerProps['onChange'] = (date) => {
+        if (date) {
+            setTaskDueDate(date.toDate());
+        }
+    };
+
     return (
         <>
             <Card
                 style={{ height: "100%", paddingBottom: "10px" }}
                 styles={{ body: { height: "100%" } }}
-                // style={fullView ? { height: "100%", paddingBottom: "10px" } : { width: 300 }}
-                // styles={fullView ? { body: { height: "100%" } } : undefined}
-                // bodyStyle={{ height: "100%" }}
-                // styles.body={{height: "100%"}}
                 actions={[
                     <SaveFilled key="edit" onClick={handleSubmit} />,
                 ]}
             >
                 <Meta
                     style={{ height: "100%" }}
-                    title={"Editing Task: " + task?.title}
+                    title={
+                        <>
+                            <Flex justify='space-between'>
+                                <span>
+                                    Editing: {task?.title}
+                                </span>
+                                <span>
+                                    Due Date:
+                                    <DatePicker
+                                        style={{ marginLeft: '10px' }}
+                                        defaultValue={dayjs(taskDueDate.toISOString().split('T')[0], dateFormat)}
+                                        minDate={dayjs(new Date().toISOString().split('T')[0], dateFormat)}
+                                        onChange={onDateChange}
+                                    />
+                                </span>
+                            </Flex>
+                        </>
+                    }
                     description={(
                         <Form
-                            layout="horizontal"
+                            name="basic"
+                            style={{ height: '100%', padding: "10px" }}
+                            initialValues={{ remember: true }}
+                            autoComplete="off"
                         >
-                            <Form.Item>
-                                <TextArea style={{ height: '100%' }} value={taskDetails} onChange={onChangeTaskDetails} />
+                            <Form.Item<FieldType>
+
+                                name="username"
+                                initialValue={taskTitle}
+                                rules={[{ required: true, message: 'Please give a title!' }]}
+                            >
+                                <Input style={{ border: 'none', backgroundColor: '#f0f6f5', borderRadius: 0 }} onChange={onChangeTitle} placeholder='Title' />
                             </Form.Item>
-                            {/* <Form.Item>
-                                <Button type="primary" htmlType="submit" onClick={handleSubmit}>
-                                    Save
-                                </Button>
-                            </Form.Item> */}
+
+                            <Form.Item<FieldType>
+                                name="password"
+                                initialValue={taskDetails}
+                                style={{ height: "100%", maxHeight: "65vh", overflow: "auto" }}
+                            >
+                                <Input.TextArea autoSize onChange={onChangeTaskDetails} placeholder='Enter Task Details' style={{ height: "100%", backgroundColor: '#f0f6f5', border: "20px black", borderRadius: 0 }} />
+                            </Form.Item>
                         </Form>
                     )}
-                // description={fullView ? task?.details : task?.details.slice(0, 100) + '...'}
                 />
             </Card>
-            {/* <Typography.Title level={2}>Create Task</Typography.Title>
-            <Form
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 14 }}
-                layout="horizontal"
-                style={{ maxWidth: 600 }}
-            >
-                <Form.Item>
-                    <TextArea value={taskDetails} onChange={onChangeTaskDetails} style={{ maxWidth: "80vw" }} rows={20} />
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" onClick={handleSubmit}>
-                        Save
-                    </Button>
-                </Form.Item>
-            </Form> */}
         </>
     );
 };
